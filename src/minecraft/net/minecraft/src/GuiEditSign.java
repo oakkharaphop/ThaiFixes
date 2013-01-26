@@ -98,7 +98,7 @@ public class GuiEditSign extends GuiScreen
             this.entitySign.signText[this.editLine] = this.entitySign.signText[this.editLine].substring(0, this.entitySign.signText[this.editLine].length() - 1);
         }
 
-        if (allowedCharacters.indexOf(par1) >= 0 && this.entitySign.signText[this.editLine].length() < 15/* ThaiFixes start */ || ThaiFixes.isThaiChar(par1)/* ThaiFixes end */)
+        if (allowedCharacters.indexOf(par1) >= 0 && this.entitySign.signText[this.editLine].length() < 15/* ThaiFixes start */ || (ThaiFixes.isThaiChar(par1) && this.entitySign.signText[this.editLine].length() < 15)/* ThaiFixes end */)
         {
             this.entitySign.signText[this.editLine] = this.entitySign.signText[this.editLine] + par1;
         }
