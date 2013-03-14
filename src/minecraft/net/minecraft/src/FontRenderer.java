@@ -9,13 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import javax.imageio.ImageIO;
+import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 public class FontRenderer
 {
     /** Array of width of all the characters in default.png */
     private int[] charWidth = new int[256];
-    public int fontTextureName = 0;
 
     /** the height in pixels of default text */
     public int FONT_HEIGHT = 9;
@@ -27,20 +27,11 @@ public class FontRenderer
     private byte[] glyphWidth = new byte[65536];
 
     /**
-     * Array of GL texture ids for loaded glyph_XX.png images. Indexed by Unicode block (group of 256 chars).
-     */
-    private final int[] glyphTextureName = new int[256];
-
-    /**
      * Array of RGB triplets defining the 16 standard chat colors followed by 16 darker version of the same colors for
      * drop shadows.
      */
     private int[] colorCode = new int[32];
-
-    /**
-     * The currently bound GL texture ID. Avoids unnecessary glBindTexture() for the same texture if it's already bound.
-     */
-    private int boundTextureName;
+    private final String field_98307_f;
 
     /** The RenderEngine used to load and setup glyph textures. */
     private final RenderEngine renderEngine;
@@ -98,120 +89,137 @@ public class FontRenderer
     FontRenderer()
     {
         this.renderEngine = null;
+        this.field_98307_f = null;
     }
 
     public FontRenderer(GameSettings par1GameSettings, String par2Str, RenderEngine par3RenderEngine, boolean par4)
     {
+        this.field_98307_f = par2Str;
         this.renderEngine = par3RenderEngine;
         this.unicodeFlag = par4;
-        BufferedImage var5;
+        this.func_98304_a();
+        par3RenderEngine.func_98187_b(par2Str);
 
-        try
+        for (int var5 = 0; var5 < 32; ++var5)
         {
-            var5 = ImageIO.read(RenderEngine.class.getResourceAsStream(par2Str));
-            InputStream var6 = RenderEngine.class.getResourceAsStream("/font/glyph_sizes.bin");
-            var6.read(this.glyphWidth);
-        }
-        catch (IOException var18)
-        {
-            throw new RuntimeException(var18);
-        }
+            int var6 = (var5 >> 3 & 1) * 85;
+            int var7 = (var5 >> 2 & 1) * 170 + var6;
+            int var8 = (var5 >> 1 & 1) * 170 + var6;
+            int var9 = (var5 >> 0 & 1) * 170 + var6;
 
-        int var19 = var5.getWidth();
-        int var7 = var5.getHeight();
-        int[] var8 = new int[var19 * var7];
-        var5.getRGB(0, 0, var19, var7, var8, 0, var19);
-        int var9 = 0;
-        int var10;
-        int var11;
-        int var12;
-        int var13;
-        int var15;
-        int var16;
-
-        while (var9 < 256)
-        {
-            var10 = var9 % 16;
-            var11 = var9 / 16;
-            var12 = 7;
-
-            while (true)
+            if (var5 == 6)
             {
-                if (var12 >= 0)
-                {
-                    var13 = var10 * 8 + var12;
-                    boolean var14 = true;
-
-                    for (var15 = 0; var15 < 8 && var14; ++var15)
-                    {
-                        var16 = (var11 * 8 + var15) * var19;
-                        int var17 = var8[var13 + var16] & 255;
-
-                        if (var17 > 0)
-                        {
-                            var14 = false;
-                        }
-                    }
-
-                    if (var14)
-                    {
-                        --var12;
-                        continue;
-                    }
-                }
-
-                if (var9 == 32)
-                {
-                    var12 = 2;
-                }
-
-                this.charWidth[var9] = var12 + 2;
-                ++var9;
-                break;
-            }
-        }
-
-        this.fontTextureName = par3RenderEngine.allocateAndSetupTexture(var5);
-
-        for (var9 = 0; var9 < 32; ++var9)
-        {
-            var10 = (var9 >> 3 & 1) * 85;
-            var11 = (var9 >> 2 & 1) * 170 + var10;
-            var12 = (var9 >> 1 & 1) * 170 + var10;
-            var13 = (var9 >> 0 & 1) * 170 + var10;
-
-            if (var9 == 6)
-            {
-                var11 += 85;
+                var7 += 85;
             }
 
             if (par1GameSettings.anaglyph)
             {
-                int var20 = (var11 * 30 + var12 * 59 + var13 * 11) / 100;
-                var15 = (var11 * 30 + var12 * 70) / 100;
-                var16 = (var11 * 30 + var13 * 70) / 100;
-                var11 = var20;
-                var12 = var15;
-                var13 = var16;
+                int var10 = (var7 * 30 + var8 * 59 + var9 * 11) / 100;
+                int var11 = (var7 * 30 + var8 * 70) / 100;
+                int var12 = (var7 * 30 + var9 * 70) / 100;
+                var7 = var10;
+                var8 = var11;
+                var9 = var12;
             }
 
-            if (var9 >= 16)
+            if (var5 >= 16)
             {
-                var11 /= 4;
-                var12 /= 4;
-                var13 /= 4;
+                var7 /= 4;
+                var8 /= 4;
+                var9 /= 4;
             }
 
-            this.colorCode[var9] = (var11 & 255) << 16 | (var12 & 255) << 8 | var13 & 255;
+            this.colorCode[var5] = (var7 & 255) << 16 | (var8 & 255) << 8 | var9 & 255;
+        }
+    }
+
+    public void func_98304_a()
+    {
+        this.func_98306_d();
+        this.func_98305_c(this.field_98307_f);
+    }
+
+    private void func_98305_c(String par1Str)
+    {
+        BufferedImage var2;
+
+        try
+        {
+            var2 = ImageIO.read(RenderEngine.class.getResourceAsStream(par1Str));
+        }
+        catch (IOException var15)
+        {
+            throw new RuntimeException(var15);
+        }
+
+        int var3 = var2.getWidth();
+        int var4 = var2.getHeight();
+        int[] var5 = new int[var3 * var4];
+        var2.getRGB(0, 0, var3, var4, var5, 0, var3);
+        int var6 = 0;
+
+        while (var6 < 256)
+        {
+            int var7 = var6 % 16;
+            int var8 = var6 / 16;
+            int var9 = 7;
+
+            while (true)
+            {
+                if (var9 >= 0)
+                {
+                    int var10 = var7 * 8 + var9;
+                    boolean var11 = true;
+
+                    for (int var12 = 0; var12 < 8 && var11; ++var12)
+                    {
+                        int var13 = (var8 * 8 + var12) * var3;
+                        int var14 = var5[var10 + var13] & 255;
+
+                        if (var14 > 0)
+                        {
+                            var11 = false;
+                        }
+                    }
+
+                    if (var11)
+                    {
+                        --var9;
+                        continue;
+                    }
+                }
+
+                if (var6 == 32)
+                {
+                    var9 = 2;
+                }
+
+                this.charWidth[var6] = var9 + 2;
+                ++var6;
+                break;
+            }
+        }
+    }
+
+    private void func_98306_d()
+    {
+        try
+        {
+            InputStream var1 = Minecraft.getMinecraft().texturePackList.getSelectedTexturePack().getResourceAsStream("/font/glyph_sizes.bin");
+            var1.read(this.glyphWidth);
+        }
+        catch (IOException var2)
+        {
+            throw new RuntimeException(var2);
         }
     }
 
     /**
      * Pick how to render a single character and return the width used.
      */
-    private float renderCharAtPos(int par1, char par2, boolean par3)
+    private float renderCharAtPos(int par1, char par2, boolean par3)//this.renderUnicodeChar(par2, par3)
     {
-        return par2 == 32 ? 4.0F : (par1 > 0 && !this.unicodeFlag ? this.renderDefaultChar(par1 + 32, par3) : this.renderUnicodeChar(par2, par3));
+        return par2 == 32 ? 4.0F : (par1 > 0 && !this.unicodeFlag ? this.renderDefaultChar(par1 + 32, par3) : (ThaiFixes.isThaiChar(par2) ? this.renderThaiChar(par2, par3) : this.renderUnicodeChar(par2, par3)));
     }
 
     /**
@@ -222,13 +230,7 @@ public class FontRenderer
         float var3 = (float)(par1 % 16 * 8);
         float var4 = (float)(par1 / 16 * 8);
         float var5 = par2 ? 1.0F : 0.0F;
-
-        if (this.boundTextureName != this.fontTextureName)
-        {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.fontTextureName);
-            this.boundTextureName = this.fontTextureName;
-        }
-
+        this.renderEngine.func_98187_b(this.field_98307_f);
         float var6 = (float)this.charWidth[par1] - 0.01F;
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
         GL11.glTexCoord2f(var3 / 128.0F, var4 / 128.0F);
@@ -248,22 +250,46 @@ public class FontRenderer
      */
     private void loadGlyphTexture(int par1)
     {
-        String var3 = String.format("/font/glyph_%02X.png", new Object[] {Integer.valueOf(par1)});
-        BufferedImage var2;
-
-        try
-        {
-            var2 = ImageIO.read(RenderEngine.class.getResourceAsStream(var3));
-        }
-        catch (IOException var5)
-        {
-            throw new RuntimeException(var5);
-        }
-
-        this.glyphTextureName[par1] = this.renderEngine.allocateAndSetupTexture(var2);
-        this.boundTextureName = this.glyphTextureName[par1];
+        String var2 = String.format("/font/glyph_%02X.png", new Object[] {Integer.valueOf(par1)});
+        this.renderEngine.func_98187_b(var2);
     }
 
+    private float renderThaiChar(char par1, boolean par2)
+    {
+        if (this.glyphWidth[par1] == 0)
+        {
+            return 0.0F;
+        }
+        else
+        {
+        	if(ThaiFixes.isSpecialThaiChar(par1)){
+            	posX -= 4F;
+            }
+        	
+            int var3 = par1 / 256;
+            this.loadGlyphTexture(var3);
+            int var4 = this.glyphWidth[par1] >>> 4;
+            int var5 = this.glyphWidth[par1] & 15;
+            float var6 = (float)var4;
+            float var7 = (float)(var5 + 1);
+            float var8 = (float)(par1 % 16 * 16) + var6;
+            float var9 = (float)((par1 & 255) / 16 * 16);
+            float var10 = var7 - var6 - 0.02F;
+            float var11 = par2 ? 1.0F : 0.0F;
+            GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+            GL11.glTexCoord2f(var8 / 256.0F, var9 / 256.0F);
+            GL11.glVertex3f(this.posX + var11, this.posY, 0.0F);
+            GL11.glTexCoord2f(var8 / 256.0F, (var9 + 15.98F) / 256.0F);
+            GL11.glVertex3f(this.posX - var11, this.posY + 7.99F, 0.0F);
+            GL11.glTexCoord2f((var8 + var10) / 256.0F, var9 / 256.0F);
+            GL11.glVertex3f(this.posX + var10 / 2.0F + var11, this.posY, 0.0F);
+            GL11.glTexCoord2f((var8 + var10) / 256.0F, (var9 + 15.98F) / 256.0F);
+            GL11.glVertex3f(this.posX + var10 / 2.0F - var11, this.posY + 7.99F, 0.0F);
+            GL11.glEnd();
+            return (var7 - var6) / 2.0F + 1.0F;
+        }
+    }
+    
     /**
      * Render a single Unicode character at current (posX,posY) location using one of the /font/glyph_XX.png files...
      */
@@ -276,22 +302,7 @@ public class FontRenderer
         else
         {
             int var3 = par1 / 256;
-
-            if (this.glyphTextureName[var3] == 0)
-            {
-                this.loadGlyphTexture(var3);
-            }
-
-            if (this.boundTextureName != this.glyphTextureName[var3])
-            {
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.glyphTextureName[var3]);
-                this.boundTextureName = this.glyphTextureName[var3];
-            }
-            /* ThaiFixes start */
-            if(ThaiFixes.isSpecialThaiChar(par1)){
-            	posX -= 4F;
-            }
-            /*ThaiFixes end */
+            this.loadGlyphTexture(var3);
             int var4 = this.glyphWidth[par1] >>> 4;
             int var5 = this.glyphWidth[par1] & 15;
             float var6 = (float)var4;
@@ -534,46 +545,75 @@ public class FontRenderer
                     var5 = var6;
                 }
 
-                float var9 = this.renderCharAtPos(var5, var4, this.italicStyle);
+                float var11 = this.unicodeFlag ? 0.5F : 1.0F;
+                boolean var7 = (var5 <= 0 || this.unicodeFlag) && par2;
+
+                if (var7)
+                {
+                    this.posX -= var11;
+                    this.posY -= var11;
+                }
+
+                float var8 = this.renderCharAtPos(var5, var4, this.italicStyle);
+
+                if (var7)
+                {
+                    this.posX += var11;
+                    this.posY += var11;
+                }
 
                 if (this.boldStyle)
                 {
-                    ++this.posX;
+                    this.posX += var11;
+
+                    if (var7)
+                    {
+                        this.posX -= var11;
+                        this.posY -= var11;
+                    }
+
                     this.renderCharAtPos(var5, var4, this.italicStyle);
-                    --this.posX;
-                    ++var9;
+                    this.posX -= var11;
+
+                    if (var7)
+                    {
+                        this.posX += var11;
+                        this.posY += var11;
+                    }
+
+                    ++var8;
                 }
 
-                Tessellator var7;
+                Tessellator var9;
 
                 if (this.strikethroughStyle)
                 {
-                    var7 = Tessellator.instance;
+                    var9 = Tessellator.instance;
                     GL11.glDisable(GL11.GL_TEXTURE_2D);
-                    var7.startDrawingQuads();
-                    var7.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
-                    var7.addVertex((double)(this.posX + var9), (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
-                    var7.addVertex((double)(this.posX + var9), (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
-                    var7.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
-                    var7.draw();
+                    var9.startDrawingQuads();
+                    var9.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
+                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
+                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
+                    var9.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
+                    var9.draw();
                     GL11.glEnable(GL11.GL_TEXTURE_2D);
                 }
 
                 if (this.underlineStyle)
                 {
-                    var7 = Tessellator.instance;
+                    var9 = Tessellator.instance;
                     GL11.glDisable(GL11.GL_TEXTURE_2D);
-                    var7.startDrawingQuads();
-                    int var8 = this.underlineStyle ? -1 : 0;
-                    var7.addVertex((double)(this.posX + (float)var8), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
-                    var7.addVertex((double)(this.posX + var9), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
-                    var7.addVertex((double)(this.posX + var9), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
-                    var7.addVertex((double)(this.posX + (float)var8), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
-                    var7.draw();
+                    var9.startDrawingQuads();
+                    int var10 = this.underlineStyle ? -1 : 0;
+                    var9.addVertex((double)(this.posX + (float)var10), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
+                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
+                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
+                    var9.addVertex((double)(this.posX + (float)var10), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
+                    var9.draw();
                     GL11.glEnable(GL11.GL_TEXTURE_2D);
                 }
 
-                this.posX += (float)((int)var9);
+                this.posX += (float)((int)var8);
             }
         }
     }
@@ -604,8 +644,6 @@ public class FontRenderer
         }
         else
         {
-            this.boundTextureName = 0;
-
             if ((par4 & -67108864) == 0)
             {
                 par4 |= -16777216;
@@ -684,11 +722,6 @@ public class FontRenderer
      */
     public int getCharWidth(char par1)
     {
-    	/* ThaiFixes start */
-    	if(ThaiFixes.isSpecialThaiChar(par1)){
-    		return 0;
-    	}
-    	/* ThaiFixes end */
         if (par1 == 167)
         {
             return -1;

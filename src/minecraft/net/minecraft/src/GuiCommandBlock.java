@@ -11,6 +11,8 @@ public class GuiCommandBlock extends GuiScreen
 
     /** Command block being edited. */
     private final TileEntityCommandBlock commandBlock;
+    private GuiButton field_100003_c;
+    private GuiButton field_100002_d;
 
     public GuiCommandBlock(TileEntityCommandBlock par1)
     {
@@ -32,13 +34,14 @@ public class GuiCommandBlock extends GuiScreen
     {
         StringTranslate var1 = StringTranslate.getInstance();
         Keyboard.enableRepeatEvents(true);
-        this.controlList.clear();
-        this.controlList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 96 + 12, var1.translateKey("gui.done")));
-        this.controlList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 120 + 12, var1.translateKey("gui.cancel")));
+        this.buttonList.clear();
+        this.buttonList.add(this.field_100003_c = new GuiButton(0, this.width / 2 - 100, this.height / 4 + 96 + 12, var1.translateKey("gui.done")));
+        this.buttonList.add(this.field_100002_d = new GuiButton(1, this.width / 2 - 100, this.height / 4 + 120 + 12, var1.translateKey("gui.cancel")));
         this.commandTextField = new GuiTextField(this.fontRenderer, this.width / 2 - 150, 60, 300, 20);
         this.commandTextField.setMaxStringLength(32767);
         this.commandTextField.setFocused(true);
         this.commandTextField.setText(this.commandBlock.getCommand());
+        this.field_100003_c.enabled = this.commandTextField.getText().trim().length() > 0;
     }
 
     /**
@@ -72,7 +75,7 @@ public class GuiCommandBlock extends GuiScreen
                     var4.writeInt(this.commandBlock.yCoord);
                     var4.writeInt(this.commandBlock.zCoord);
                     Packet.writeString(this.commandTextField.getText(), var4);
-                    this.mc.getSendQueue().addToSendQueue(new Packet250CustomPayload(var2, var3.toByteArray()));
+                    this.mc.getNetHandler().addToSendQueue(new Packet250CustomPayload(var2, var3.toByteArray()));
                 }
                 catch (Exception var6)
                 {
@@ -89,13 +92,21 @@ public class GuiCommandBlock extends GuiScreen
      */
     protected void keyTyped(char par1, int par2)
     {
-    	par1 = ThaiFixes.covertToThai(par1); //ThaiFixes
+    	par1 = ThaiFixes.covertToThai(par1);
+    	
         this.commandTextField.textboxKeyTyped(par1, par2);
-        ((GuiButton)this.controlList.get(0)).enabled = this.commandTextField.getText().trim().length() > 0;
+        this.field_100003_c.enabled = this.commandTextField.getText().trim().length() > 0;
 
-        if (par1 == 13)
+        if (par2 != 28 && par1 != 13)
         {
-            this.actionPerformed((GuiButton)this.controlList.get(0));
+            if (par2 == 1)
+            {
+                this.actionPerformed(this.field_100002_d);
+            }
+        }
+        else
+        {
+            this.actionPerformed(this.field_100003_c);
         }
     }
 

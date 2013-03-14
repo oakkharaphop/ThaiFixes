@@ -21,6 +21,7 @@ public class GuiEditSign extends GuiScreen
 
     /** The number of the line that is being edited. */
     private int editLine = 0;
+    private GuiButton field_100001_o;
 
     public GuiEditSign(TileEntitySign par1TileEntitySign)
     {
@@ -32,9 +33,9 @@ public class GuiEditSign extends GuiScreen
      */
     public void initGui()
     {
-        this.controlList.clear();
+        this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);
-        this.controlList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, "Done"));
+        this.buttonList.add(this.field_100001_o = new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, "Done"));
         this.entitySign.setEditable(false);
     }
 
@@ -44,7 +45,7 @@ public class GuiEditSign extends GuiScreen
     public void onGuiClosed()
     {
         Keyboard.enableRepeatEvents(false);
-        NetClientHandler var1 = this.mc.getSendQueue();
+        NetClientHandler var1 = this.mc.getNetHandler();
 
         if (var1 != null)
         {
@@ -82,7 +83,8 @@ public class GuiEditSign extends GuiScreen
      */
     protected void keyTyped(char par1, int par2)
     {
-    	par1 = ThaiFixes.covertToThai(par1); //ThaiFixes
+    	par1 = ThaiFixes.covertToThai(par1);
+    	
         if (par2 == 200)
         {
             this.editLine = this.editLine - 1 & 3;
@@ -98,9 +100,14 @@ public class GuiEditSign extends GuiScreen
             this.entitySign.signText[this.editLine] = this.entitySign.signText[this.editLine].substring(0, this.entitySign.signText[this.editLine].length() - 1);
         }
 
-        if (allowedCharacters.indexOf(par1) >= 0 && this.entitySign.signText[this.editLine].length() < 15/* ThaiFixes start */ || (ThaiFixes.isThaiChar(par1) && this.entitySign.signText[this.editLine].length() < 15)/* ThaiFixes end */)
+        if (allowedCharacters.indexOf(par1) >= 0 && this.entitySign.signText[this.editLine].length() < 15 || (ThaiFixes.isThaiChar(par1) && this.entitySign.signText[this.editLine].length() < 15))
         {
             this.entitySign.signText[this.editLine] = this.entitySign.signText[this.editLine] + par1;
+        }
+
+        if (par2 == 1)
+        {
+            this.actionPerformed(this.field_100001_o);
         }
     }
 

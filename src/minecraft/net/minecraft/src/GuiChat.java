@@ -76,7 +76,8 @@ public class GuiChat extends GuiScreen
      */
     protected void keyTyped(char par1, int par2)
     {
-    	par1 = ThaiFixes.covertToThai(par1); //ThaiFixes
+    	par1 = ThaiFixes.covertToThai(par1);
+    	
         this.field_73905_m = false;
 
         if (par2 == 15)
@@ -118,11 +119,11 @@ public class GuiChat extends GuiScreen
         }
         else if (par2 == 201)
         {
-            this.mc.ingameGUI.getChatGUI().scroll(19);
+            this.mc.ingameGUI.getChatGUI().scroll(this.mc.ingameGUI.getChatGUI().func_96127_i() - 1);
         }
         else if (par2 == 209)
         {
-            this.mc.ingameGUI.getChatGUI().scroll(-19);
+            this.mc.ingameGUI.getChatGUI().scroll(-this.mc.ingameGUI.getChatGUI().func_96127_i() + 1);
         }
         else
         {
