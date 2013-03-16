@@ -722,6 +722,8 @@ public class FontRenderer
      */
     public int getCharWidth(char par1)
     {
+    	if(ThaiFixes.isSpecialThaiChar(par1)) return 0;
+    	
         if (par1 == 167)
         {
             return -1;
