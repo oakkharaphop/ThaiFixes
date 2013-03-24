@@ -665,7 +665,7 @@ public class GuiContainerCreative extends InventoryEffectRenderer
         for (var7 = 0; var7 < var6; ++var7)
         {
             CreativeTabs var8 = var5[var7];
-            this.mc.renderEngine.func_98187_b("/gui/allitems.png");
+            this.mc.renderEngine.bindTexture("/gui/allitems.png");
 
             if (var8.getTabIndex() != selectedTabIndex)
             {
@@ -673,14 +673,14 @@ public class GuiContainerCreative extends InventoryEffectRenderer
             }
         }
 
-        this.mc.renderEngine.func_98187_b("/gui/creative_inv/" + var4.getBackgroundImageName());
+        this.mc.renderEngine.bindTexture("/gui/creative_inv/" + var4.getBackgroundImageName());
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
         this.searchField.drawTextBox();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         int var9 = this.guiLeft + 175;
         var6 = this.guiTop + 18;
         var7 = var6 + 112;
-        this.mc.renderEngine.func_98187_b("/gui/allitems.png");
+        this.mc.renderEngine.bindTexture("/gui/allitems.png");
 
         if (var4.shouldHidePlayerInventory())
         {

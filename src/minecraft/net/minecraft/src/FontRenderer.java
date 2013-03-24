@@ -31,7 +31,7 @@ public class FontRenderer
      * drop shadows.
      */
     private int[] colorCode = new int[32];
-    private final String field_98307_f;
+    private final String fontTextureName;
 
     /** The RenderEngine used to load and setup glyph textures. */
     private final RenderEngine renderEngine;
@@ -89,16 +89,16 @@ public class FontRenderer
     FontRenderer()
     {
         this.renderEngine = null;
-        this.field_98307_f = null;
+        this.fontTextureName = null;
     }
 
     public FontRenderer(GameSettings par1GameSettings, String par2Str, RenderEngine par3RenderEngine, boolean par4)
     {
-        this.field_98307_f = par2Str;
+        this.fontTextureName = par2Str;
         this.renderEngine = par3RenderEngine;
         this.unicodeFlag = par4;
-        this.func_98304_a();
-        par3RenderEngine.func_98187_b(par2Str);
+        this.readFontData();
+        par3RenderEngine.bindTexture(par2Str);
 
         for (int var5 = 0; var5 < 32; ++var5)
         {
@@ -133,13 +133,13 @@ public class FontRenderer
         }
     }
 
-    public void func_98304_a()
+    public void readFontData()
     {
-        this.func_98306_d();
-        this.func_98305_c(this.field_98307_f);
+        this.readGlyphSizes();
+        this.readFontTexture(this.fontTextureName);
     }
 
-    private void func_98305_c(String par1Str)
+    private void readFontTexture(String par1Str)
     {
         BufferedImage var2;
 
@@ -201,7 +201,7 @@ public class FontRenderer
         }
     }
 
-    private void func_98306_d()
+    private void readGlyphSizes()
     {
         try
         {
@@ -217,43 +217,11 @@ public class FontRenderer
     /**
      * Pick how to render a single character and return the width used.
      */
-    private float renderCharAtPos(int par1, char par2, boolean par3)//this.renderUnicodeChar(par2, par3)
+    private float renderCharAtPos(int par1, char par2, boolean par3)
     {
-        return par2 == 32 ? 4.0F : (par1 > 0 && !this.unicodeFlag ? this.renderDefaultChar(par1 + 32, par3) : (ThaiFixes.isThaiChar(par2) ? this.renderThaiChar(par2, par3) : this.renderUnicodeChar(par2, par3)));
+    	return par2 == 32 ? 4.0F : (par1 > 0 && !this.unicodeFlag ? this.renderDefaultChar(par1 + 32, par3) : (ThaiFixes.isThaiChar(par2) ? this.renderThaiChar(par2, par3) : this.renderUnicodeChar(par2, par3)));
     }
-
-    /**
-     * Render a single character with the default.png font at current (posX,posY) location...
-     */
-    private float renderDefaultChar(int par1, boolean par2)
-    {
-        float var3 = (float)(par1 % 16 * 8);
-        float var4 = (float)(par1 / 16 * 8);
-        float var5 = par2 ? 1.0F : 0.0F;
-        this.renderEngine.func_98187_b(this.field_98307_f);
-        float var6 = (float)this.charWidth[par1] - 0.01F;
-        GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-        GL11.glTexCoord2f(var3 / 128.0F, var4 / 128.0F);
-        GL11.glVertex3f(this.posX + var5, this.posY, 0.0F);
-        GL11.glTexCoord2f(var3 / 128.0F, (var4 + 7.99F) / 128.0F);
-        GL11.glVertex3f(this.posX - var5, this.posY + 7.99F, 0.0F);
-        GL11.glTexCoord2f((var3 + var6) / 128.0F, var4 / 128.0F);
-        GL11.glVertex3f(this.posX + var6 + var5, this.posY, 0.0F);
-        GL11.glTexCoord2f((var3 + var6) / 128.0F, (var4 + 7.99F) / 128.0F);
-        GL11.glVertex3f(this.posX + var6 - var5, this.posY + 7.99F, 0.0F);
-        GL11.glEnd();
-        return (float)this.charWidth[par1];
-    }
-
-    /**
-     * Load one of the /font/glyph_XX.png into a new GL texture and store the texture ID in glyphTextureName array.
-     */
-    private void loadGlyphTexture(int par1)
-    {
-        String var2 = String.format("/font/glyph_%02X.png", new Object[] {Integer.valueOf(par1)});
-        this.renderEngine.func_98187_b(var2);
-    }
-
+    
     private float renderThaiChar(char par1, boolean par2)
     {
         if (this.glyphWidth[par1] == 0)
@@ -289,7 +257,39 @@ public class FontRenderer
             return (var7 - var6) / 2.0F + 1.0F;
         }
     }
-    
+
+    /**
+     * Render a single character with the default.png font at current (posX,posY) location...
+     */
+    private float renderDefaultChar(int par1, boolean par2)
+    {
+        float var3 = (float)(par1 % 16 * 8);
+        float var4 = (float)(par1 / 16 * 8);
+        float var5 = par2 ? 1.0F : 0.0F;
+        this.renderEngine.bindTexture(this.fontTextureName);
+        float var6 = (float)this.charWidth[par1] - 0.01F;
+        GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+        GL11.glTexCoord2f(var3 / 128.0F, var4 / 128.0F);
+        GL11.glVertex3f(this.posX + var5, this.posY, 0.0F);
+        GL11.glTexCoord2f(var3 / 128.0F, (var4 + 7.99F) / 128.0F);
+        GL11.glVertex3f(this.posX - var5, this.posY + 7.99F, 0.0F);
+        GL11.glTexCoord2f((var3 + var6) / 128.0F, var4 / 128.0F);
+        GL11.glVertex3f(this.posX + var6 + var5, this.posY, 0.0F);
+        GL11.glTexCoord2f((var3 + var6) / 128.0F, (var4 + 7.99F) / 128.0F);
+        GL11.glVertex3f(this.posX + var6 - var5, this.posY + 7.99F, 0.0F);
+        GL11.glEnd();
+        return (float)this.charWidth[par1];
+    }
+
+    /**
+     * Load one of the /font/glyph_XX.png into a new GL texture and store the texture ID in glyphTextureName array.
+     */
+    private void loadGlyphTexture(int par1)
+    {
+        String var2 = String.format("/font/glyph_%02X.png", new Object[] {Integer.valueOf(par1)});
+        this.renderEngine.bindTexture(var2);
+    }
+
     /**
      * Render a single Unicode character at current (posX,posY) location using one of the /font/glyph_XX.png files...
      */
@@ -722,8 +722,6 @@ public class FontRenderer
      */
     public int getCharWidth(char par1)
     {
-    	if(ThaiFixes.isSpecialThaiChar(par1)) return 0;
-    	
         if (par1 == 167)
         {
             return -1;
