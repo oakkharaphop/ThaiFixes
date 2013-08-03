@@ -219,43 +219,7 @@ public class FontRenderer
      */
     private float renderCharAtPos(int par1, char par2, boolean par3)
     {
-    	return par2 == 32 ? 4.0F : (par1 > 0 && !this.unicodeFlag ? this.renderDefaultChar(par1 + 32, par3) : (ThaiFixes.isThaiChar(par2) ? this.renderThaiChar(par2, par3) : this.renderUnicodeChar(par2, par3)));
-    }
-    
-    private float renderThaiChar(char par1, boolean par2)
-    {
-        if (this.glyphWidth[par1] == 0)
-        {
-            return 0.0F;
-        }
-        else
-        {
-        	if(ThaiFixes.isSpecialThaiChar(par1)){
-            	posX -= 4F;
-            }
-        	
-            int var3 = par1 / 256;
-            this.loadGlyphTexture(var3);
-            int var4 = this.glyphWidth[par1] >>> 4;
-            int var5 = this.glyphWidth[par1] & 15;
-            float var6 = (float)var4;
-            float var7 = (float)(var5 + 1);
-            float var8 = (float)(par1 % 16 * 16) + var6;
-            float var9 = (float)((par1 & 255) / 16 * 16);
-            float var10 = var7 - var6 - 0.02F;
-            float var11 = par2 ? 1.0F : 0.0F;
-            GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-            GL11.glTexCoord2f(var8 / 256.0F, var9 / 256.0F);
-            GL11.glVertex3f(this.posX + var11, this.posY, 0.0F);
-            GL11.glTexCoord2f(var8 / 256.0F, (var9 + 15.98F) / 256.0F);
-            GL11.glVertex3f(this.posX - var11, this.posY + 7.99F, 0.0F);
-            GL11.glTexCoord2f((var8 + var10) / 256.0F, var9 / 256.0F);
-            GL11.glVertex3f(this.posX + var10 / 2.0F + var11, this.posY, 0.0F);
-            GL11.glTexCoord2f((var8 + var10) / 256.0F, (var9 + 15.98F) / 256.0F);
-            GL11.glVertex3f(this.posX + var10 / 2.0F - var11, this.posY + 7.99F, 0.0F);
-            GL11.glEnd();
-            return (var7 - var6) / 2.0F + 1.0F;
-        }
+        return par2 == 32 ? 4.0F : (par1 > 0 && !this.unicodeFlag ? this.renderDefaultChar(par1 + 32, par3) : this.renderUnicodeChar(par2, par3));
     }
 
     /**
@@ -267,6 +231,28 @@ public class FontRenderer
         float var4 = (float)(par1 / 16 * 8);
         float var5 = par2 ? 1.0F : 0.0F;
         this.renderEngine.bindTexture(this.fontTextureName);
+        float var6 = (float)this.charWidth[par1] - 0.01F;
+        GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+        GL11.glTexCoord2f(var3 / 128.0F, var4 / 128.0F);
+        GL11.glVertex3f(this.posX + var5, this.posY, 0.0F);
+        GL11.glTexCoord2f(var3 / 128.0F, (var4 + 7.99F) / 128.0F);
+        GL11.glVertex3f(this.posX - var5, this.posY + 7.99F, 0.0F);
+        GL11.glTexCoord2f((var3 + var6) / 128.0F, var4 / 128.0F);
+        GL11.glVertex3f(this.posX + var6 + var5, this.posY, 0.0F);
+        GL11.glTexCoord2f((var3 + var6) / 128.0F, (var4 + 7.99F) / 128.0F);
+        GL11.glVertex3f(this.posX + var6 - var5, this.posY + 7.99F, 0.0F);
+        GL11.glEnd();
+        return (float)this.charWidth[par1];
+    }
+    
+    private float renderThaiChar(char par1, boolean par2)
+    {
+    	par1 -= 3585;
+    	
+        float var3 = (float)(par1 % 16 * 8);
+        float var4 = (float)(par1 / 16 * 8);
+        float var5 = par2 ? 1.0F : 0.0F;
+        this.renderEngine.bindTexture("/font/thai.png");
         float var6 = (float)this.charWidth[par1] - 0.01F;
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
         GL11.glTexCoord2f(var3 / 128.0F, var4 / 128.0F);
@@ -311,6 +297,11 @@ public class FontRenderer
             float var9 = (float)((par1 & 255) / 16 * 16);
             float var10 = var7 - var6 - 0.02F;
             float var11 = par2 ? 1.0F : 0.0F;
+            
+            GL11.glPushMatrix();
+            float vi = 1.5F;
+            GL11.glScalef(vi, vi, vi);
+            
             GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
             GL11.glTexCoord2f(var8 / 256.0F, var9 / 256.0F);
             GL11.glVertex3f(this.posX + var11, this.posY, 0.0F);
@@ -321,6 +312,8 @@ public class FontRenderer
             GL11.glTexCoord2f((var8 + var10) / 256.0F, (var9 + 15.98F) / 256.0F);
             GL11.glVertex3f(this.posX + var10 / 2.0F - var11, this.posY + 7.99F, 0.0F);
             GL11.glEnd();
+            
+            GL11.glPopMatrix();
             return (var7 - var6) / 2.0F + 1.0F;
         }
     }
@@ -723,7 +716,6 @@ public class FontRenderer
     public int getCharWidth(char par1)
     {
     	if(ThaiFixes.isSpecialThaiChar(par1)) return 0;
-    	
         if (par1 == 167)
         {
             return -1;

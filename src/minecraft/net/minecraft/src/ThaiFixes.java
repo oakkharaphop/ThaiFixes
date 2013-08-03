@@ -9,8 +9,9 @@ public class ThaiFixes {
 	
 	public static boolean isSpecialThaiChar(char par1)
 	{
-		return !("ÑÔÕÖ×ØÙÚçèéêëìíî".indexOf(par1) < 0);
+		return "ÑÔÕÖ×ØÙÚçèéêëìíî".contains(par1 + "");
 	}
+	
 	public static char covertToUnicode(char par1)
 	{
 		return (char)((int)par1 + 3424);

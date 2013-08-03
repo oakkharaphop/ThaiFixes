@@ -246,7 +246,6 @@ public class GuiScreenBook extends GuiScreen
     protected void keyTyped(char par1, int par2)
     {
     	par1 = ThaiFixes.covertToThai(par1);
-    	
         super.keyTyped(par1, par2);
 
         if (this.bookIsUnsigned)
